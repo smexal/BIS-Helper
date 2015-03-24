@@ -11,8 +11,8 @@ define('REALM', "nazjatar");
 define('GUILD', "Going ham");
 
 define('DB_SERVER', "localhost");
-define('DB_USER', "smexal");
-define('DB_PASSWORD', "aaq2%58N");
+define('DB_USER', "----");
+define('DB_PASSWORD', "----");
 define('DB_NAME', 'bis_helper');
 
 ?>
