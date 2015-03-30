@@ -11,12 +11,12 @@ include("modules/settings.php");
 class App {
   private static $instance = null;
   private $modules = array();
-  private $current_module = "finder";
+  private $current_module = "history";
 
   public function start() {
 
-    $this->modules['finder'] = new ItemFinder();
     $this->modules['history'] = new LootHistory();
+    $this->modules['finder'] = new ItemFinder();
     $this->modules['member'] = new MemberConfiguration();
     $this->modules['items'] = new ItemConfiguration();
     $this->modules['settings'] = new Settings();

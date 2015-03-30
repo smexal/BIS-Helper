@@ -6,6 +6,7 @@ class Settings {
   public $icon = "fa fa-lock";
   public $position = "bottom";
   private $versions = array(
+    "v0.9.1" => "history as first tab, fixed utf8 problem.",
     "v0.9.0" => "all drops in general droplist, added some improvements to the database structure, switch to 'mysqli'.",
     "v0.0.0" => "initial version with basic features"
   );
