@@ -5,14 +5,21 @@ class Settings {
   public $name = "Configuratin & Settings";
   public $icon = "fa fa-lock";
   public $position = "bottom";
+  private $versions = array(
+    "v0.9.0" => "all drops in general droplist, added some improvements to the database structure, switch to 'mysqli'.",
+    "v0.0.0" => "initial version with basic features"
+  );
+  private $db = null;
 
   // global settings not
   public $ranks = null;
   public $password = null;
 
   public function __construct() {
-    $settings_result = mysql_query("SELECT * FROM config");
-    while($setting = mysql_fetch_assoc($settings_result)) {
+    if(is_null($this->db))
+      $this->db = DB::instance();
+    $settings_result = $this->db->query("SELECT * FROM config");
+    while($setting = $this->db->row($settings_result)) {
       switch ($setting['key']) {
         case 'password':
           $this->password = $setting['value'];
@@ -21,9 +28,9 @@ class Settings {
           break;
       }
     }
-    $rankresult = mysql_query("SELECT * FROM ranks");
+    $rankresult = $this->db->query("SELECT * FROM ranks");
     $this->ranks = array();
-    while($row = mysql_fetch_assoc($rankresult)) {
+    while($row = $this->db->row($rankresult)) {
       $this->ranks[$row['id']]['name'] = $row['rank'];
       $this->ranks[$row['id']]['display'] = $row['display'];
     }
@@ -45,9 +52,9 @@ class Settings {
 
   	if(self::loggedIn()) {
       if(isset($_GET['lock'])) {
-        mysql_query("UPDATE members SET locked = 1");
+        $this->db->query("UPDATE members SET locked = 1");
       } elseif(isset($_GET['unlock'])) {
-        mysql_query("UPDATE members SET locked = 0");
+        $this->db->query("UPDATE members SET locked = 0");
       }
 
 
@@ -91,10 +98,10 @@ class Settings {
 
         if($type == 'rank') {
           $query = "SELECT * FROM ranks WHERE id=".$rank;
-          if(mysql_num_rows(mysql_query($query)) > 0) {
-            mysql_query("UPDATE ranks SET rank = '".$value."', display=0 WHERE id=".$rank);
+          if($this->db->count($this->db->query($query)) > 0) {
+            $this->db->query("UPDATE ranks SET rank = '".$value."', display=0 WHERE id=".$rank);
           } else {
-            mysql_query("INSERT INTO ranks (id, rank) VALUES (".$rank.", '".$value."')") or die(mysql_error());
+            $this->db->query("INSERT INTO ranks (id, rank) VALUES (".$rank.", '".$value."')");
           }
           $this->ranks[$rank]['name'] = $value;
           $this->ranks[$rank]['display'] = 0;
@@ -104,11 +111,11 @@ class Settings {
           if(isset($_POST['display-'.$rank])) {
             $display = "1";
           }
-          if(mysql_num_rows(mysql_query($query)) > 0) {
-            mysql_query("UPDATE ranks SET display = '".$display."' WHERE id=".$rank);
+          if($this->db->count($this->db->query($query)) > 0) {
+            $this->db->query("UPDATE ranks SET display = '".$display."' WHERE id=".$rank);
             $this->ranks[$rank]['display'] = 1;
           } else {
-            mysql_query("INSERT INTO ranks (id, rank) VALUES (".$rank.", '".$value."')") or die(mysql_error());
+            $this->db->query("INSERT INTO ranks (id, rank) VALUES (".$rank.", '".$value."')");
           }
         }
       }
@@ -143,25 +150,36 @@ class Settings {
         if($key != "save") {
           if($value != '') {
             $query = "SELECT * FROM config WHERE config.key='".$key."'";
-            $result = mysql_query($query) or die(mysql_error());
-            if(mysql_num_rows($result) > 0) {
+            $result = $this->db->query($query);
+            if($this->db->count($result) > 0) {
               $query = "UPDATE config SET value='".$value."' WHERE config.key = '".$key."'";
-              mysql_query($query) or die(mysql_error());
+              $this->db->query($query);
             } else {
               $query = "INSERT INTO config (config.key, value) VALUES ('".$key."', '".$value."')";
-              mysql_query($query) or die(mysql_error());
+              $this->db->query($query);
             }
             $this->$key = $value;
           }
         }
       }
     }
+    echo '<h2>Password Change</h2>';
     echo '<form method="post">';
     echo '<label><span>&nbsp;</span><input type="submit" name="save" value="Save changes" /></label>';
     echo '<label><span>Admin Password</span><input type="text" value="'.$this->password.'" name="password" />';
     echo '</form>';
 
     echo '<a class="back-link" href="?module='.$this->id.'">back</a>';
+    echo '<hr style="margin-top: 80px" />';
+    echo '<h2>Version Overview</h2>';
+    echo '<table class="finder">';
+    foreach($this->versions as $version => $changes) {
+      echo '<tr>';
+      echo '<th>'.$version.'</th>';
+      echo '<td>'.$changes.'</td>';
+      echo '</tr>';
+    }
+    echo '</table>';
   }
 
   public function unlockLockAllPlayersView() {
@@ -170,17 +188,20 @@ class Settings {
   }
 
   public static function isLocked($playerID) {
+    $db = DB::instance();
     $query = "SELECT locked FROM members WHERE id=".$playerID;
-    $result = mysql_query($query);
-    while($row = mysql_fetch_assoc($result)) {
+    $result = $db->query($query);
+    while($row = $db->row($result)) {
       return $row['locked'];
     }
   }
   public static function unlockPlayer($playerID) {
-    mysql_query("UPDATE members SET locked = 0 WHERE id=".$playerID);
+    $db = DB::instance();
+    $db->query("UPDATE members SET locked = 0 WHERE id=".$playerID);
   }
   public static function lockPlayer($playerID) {
-    mysql_query("UPDATE members SET locked = 1 WHERE id=".$playerID);
+    $db = DB::instance();
+    $db->query("UPDATE members SET locked = 1 WHERE id=".$playerID);
   }  
 
   public static function loggedIn() {

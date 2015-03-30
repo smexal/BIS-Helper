@@ -18,6 +18,44 @@ a {
   float: left;
 }
 
+.drop-type {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  min-width: 100px;
+  color: #999;
+}
+i.left-space {
+  padding-left: 10px;
+}
+i.light {
+  color: #666;
+}
+
+div.error {
+  position: relative;
+  color: #FFF;
+  background-color: #df0f45;
+  width: 50%;
+  top: 0;
+  padding: 5px 20px;
+  margin: 20px 0 10px 0;
+  border: 1px solid #f4104c;
+}
+div.error i {
+  color: #fff;
+  font-size: 13px;
+}
+div.error > p {
+  display: inline-block;
+  width: auto;
+  padding-left: 20px;
+  font-size: 13px;
+  text-transform: uppercase;
+  font-weight: bold;
+  line-height: 20px;
+}
+
 .navigation-panel a {
   display: block;
   width: 100%;
@@ -270,16 +308,16 @@ table.members thead tr th.header:first-child {
   padding-left: 0;
 }
 table.members thead th.header {
-  background-image:url("/images/sort-inactive.png");
+  background-image:url("../images/sort-inactive.png");
   background-repeat: no-repeat;
   background-position: 10px center;
   padding-left: 30px;
 }
 table.members thead th.header.headerSortUp {
-  background-image:url("/images/sort-up.png");
+  background-image:url("../images/sort-up.png");
 }
 table.members thead th.header.headerSortDown {
-  background-image:url("/images/sort-down.png");
+  background-image:url("../images/sort-down.png");
 }
 
 

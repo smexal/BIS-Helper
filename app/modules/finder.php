@@ -22,10 +22,24 @@ class ItemFinder {
     echo '<input type="text" name="term" value="'.$term.'" />';
     echo '<input type="submit" name="go" value="Search" />';
     echo '</form>';
-
-    if(isset($_GET['obtained'])) {
-      $query = "UPDATE bis SET obtained = ".(isset($_GET['reset']) ? 0 : date("Ymd"))." WHERE item=".$_GET['obtained']." AND player = ".$_GET['player'];
-      mysql_query($query) or die(mysql_error());
+    if(Settings::loggedIn()) {
+       $db = DB::instance();
+      if(isset($_GET['obtained'])) {
+        if(!isset($_GET['reset'])) {
+          // add new item
+          $query = "INSERT INTO drops (member, item, type) VALUES (".$_GET['player'].", ".$_GET['obtained'].", 1)";
+          $db->query($query);
+        } else {
+          // remove existing item
+          // only removes from today allowed here
+          $query = "DELETE FROM drops WHERE member =".$_GET['player']." AND item=".$_GET['obtained']." AND DATE(date) LIKE '".date('Y-m-d')."'";
+          $db->query($query);
+        }
+      }
+    } else {
+      if(isset($_GET['obtained']) || isset($_GET['reset'])) {
+        App::error("Log In ma' freind or yoo no doin' da vodoo!");
+      }
     }
 
     if(isset($_POST['go']) || isset($_GET['term'])) {
@@ -34,30 +48,29 @@ class ItemFinder {
   }
 
   public function displayResults($term) {
-
+    $db = DB::instance();
     $query = "SELECT * FROM items WHERE name LIKE '%".urlencode($term)."%'";
-    $result = mysql_query($query) or die(mysql_errors());
+    $result = $db->query($query);
 
-    if(mysql_num_rows($result) > 0) {
-      while($row = mysql_fetch_assoc($result)) {
+    if($db->count($result) > 0) {
+      while($row = $db->row($result)) {
         $found = false;
         echo '<div class="bis-block">';
         echo '<h2>'.Armory::formatItem(urldecode($row['name']), $row['id']).'</h2>';
         $query = "SELECT *, SUBSTRING_INDEX(SUBSTRING_INDEX(slot,'#', 2), '#',-1) as priority FROM bis WHERE item = ".$row['id']." order by priority asc";
-
-        $bis_items = mysql_query($query);
+        $bis_items = $db->query($query);
 
         echo '<table class="finder">';
-        while($item = mysql_fetch_assoc($bis_items)) {
+        while($item = $db->row($bis_items)) {
           $found = true;
-          if($item['obtained'] > 0) {
+          if(Armory::itemReceived($item['player'], $item['item'])) {
             $class = "class='obtained'";
           } else {
             $class="";
           }
           echo '<tr '.$class.'>';
           echo '<td width="20">';
-          if($item['obtained'] == 0) {
+          if(! Armory::itemReceived($item['player'], $item['item'])) {
             echo '<a href="?module='.$this->id.'&term='.$term.'&obtained='.$row['id'].'&player='.$item['player'].'">';
             echo '<i class="fa fa-check"></i>';
             echo '</a>';

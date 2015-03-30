@@ -1,0 +1,11 @@
+============================================================
+v0.9.0
+============================================================
+- 'spec' and 'content' added to bis
+ALTER TABLE `bis` ADD `spec` INT(7) NOT NULL , ADD `content` INT(7) NOT NULL ;
+------------------------------------------------------------
+- 'type' added to drops
+ALTER TABLE `drops` ADD `type` INT(7) NOT NULL DEFAULT '0' ;
+------------------------------------------------------------
+- 'obtained' removed from database (rund v000_to_v090.php migration script first)
+ALTER TABLE `bis` DROP `obtained`;

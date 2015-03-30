@@ -1,9 +1,9 @@
 <?
 
 class Armory {
-  public static $base = "https://eu.battle.net/api/wow/";
-  public static $base_www = "https://eu.battle.net/wow/de/";
-  public static $thumbnail_www = "https://eu.battle.net/static-render/eu/";
+  public static $base = "http://eu.battle.net/api/wow/";
+  public static $base_www = "http://eu.battle.net/wow/de/";
+  public static $thumbnail_www = "http://eu.battle.net/static-render/eu/";
   public static $wowhead_heroic = 566;
 
   public static function getItem($itemId) {
@@ -22,11 +22,22 @@ class Armory {
     return $return;
   }
 
+  public static function itemReceived($player, $item) {
+    $db = DB::instance();
+    $query = "SELECT * FROM drops WHERE member=$player AND item=$item";
+    $result = $db->query($query);
+    if( $db->count($result) > 0 ) {
+      return true;
+    }
+    return false;
+  }
+
   public static function addItemToDatabase($id) {
-    $result = mysql_query("SELECT * FROM items WHERE id=".$id);
+    $db = DB::instance();
+    $result = $db->query("SELECT * FROM items WHERE id=".$id);
     $found = false;
     if($result) {
-      if(mysql_num_rows($result) > 0) {
+      if($db->count($result) > 0) {
         echo '<p>Item already in database</p>';
         $found = true;
       }
@@ -35,7 +46,7 @@ class Armory {
         $item = Armory::getItem($id);
         if($item) {
           $query = "INSERT INTO items (id, name) VALUES (".$id.", '".urlencode($item->name)."')";
-          $result = mysql_query($query) or die(mysql_error());
+          $result = $db->query($query);
           echo '<p>'.self::formatItem($item->name, $id)." added to the database.</p>";
         } else {
           echo '<p>Item not found.</p>';
@@ -45,7 +56,8 @@ class Armory {
   }
 
   public static function getItemSelection($name, $item=null) {
-    $result = mysql_query("SELECT * FROM items order by name asc");
+    $db = DB::instance();
+    $result = $db->query("SELECT * FROM items order by name asc");
     if($result) {
       $return = '<select name="'.$name.'">';
       $return.= "<option value='0'>no selection</option>";
@@ -54,7 +66,7 @@ class Armory {
       } else {
         $return.= "<option value='1'>not needed</option>";
       }
-      while($row = mysql_fetch_assoc($result)) {
+      while($row = $db->row($result)) {
         if(!is_null($item) && $item == $row['id']) {
           $selected = ' selected="selected" ';
         } else {
@@ -89,48 +101,54 @@ class Armory {
   }
 
   public static function addMemberToDatabase($member) {
-    $result = mysql_query("SELECT * FROM members WHERE name = '".utf8_decode($member->character->name)."'");
+    $db = DB::instance();
+    $result = $db->query("SELECT * FROM members WHERE name = '".utf8_decode($member->character->name)."'");
     $found = false;
     if($result) {
-      if(mysql_num_rows($result) > 0) {
+      if($db->count($result) > 0) {
         $found = true;
       }
     }
     if(!$found) {
       $query = "INSERT INTO members (id, name, realm) VALUES (NULL, '".utf8_decode($member->character->name)."', '".mysql_real_escape_string(utf8_decode($member->character->realm))."')";
-      mysql_query($query) or die(mysql_error());
+      $db->query($query);
     }
   }
 
   public static function getMemberId($character) {
-    $result = mysql_query("SELECT id FROM members where name='".utf8_decode($character->name)."'");
-    while($row = mysql_fetch_assoc($result)) {
+    $db = DB::instance();
+    $result = $db->query("SELECT id FROM members where name='".utf8_decode($character->name)."'");
+    while($row = $db->row($result)) {
       return $row['id'];
     }
   }
 
   public static function toDropList($item, $player) {
-    mysql_query("INSERT INTO drops (member, item) VALUES ($player, $item)");
+    $db = DB::instance();
+    $db->query("INSERT INTO drops (member, item) VALUES ($player, $item)");
   }
 
   public static function getPlayerNameById($id) {
-    $result = mysql_query("SELECT name, realm FROM members where id=".$id);
-    while($row = mysql_fetch_assoc($result)) {
-      return '<a href="'.self::$base_www.'character/'.strtolower($row['realm']).'/'.$row['name'].'/simple" target="_blank">'.$row['name'].' <i class="fa fa-external-link"></i></a>';
+    $db = DB::instance();
+    $result = $db->query("SELECT name, realm FROM members where id=".$id);
+    while($row = $db->row($result)) {
+      return '<a href="'.self::$base_www.'character/'.strtolower($row['realm']).'/'.$row['name'].'/simple" target="_blank">'.utf8_encode($row['name']).' <i class="fa fa-external-link"></i></a>';
     }
   }
 
   public static function getItemIdByName($name) {
-    $result = mysql_query("SELECT id FROM items where name='".urlencode($name)."'");
-    while($row = mysql_fetch_assoc($result)) {
+    $db = DB::instance();
+    $result = $db->query("SELECT id FROM items where name='".urlencode($name)."'");
+    while($row = $db->row($result)) {
       return $row['id'];
     }  
   }
 
-public static function getItemNameById($id) {
-    $result = mysql_query("SELECT name FROM items where id=".$id);
+  public static function getItemNameById($id) {
+    $db = DB::instance();
+    $result = $db->query("SELECT name FROM items where id=".$id);
     if($result) {
-      while($row = mysql_fetch_assoc($result)) {
+      while($row = $db->row($result)) {
         return $row['name'];
       }  
     }
@@ -142,12 +160,13 @@ public static function getItemNameById($id) {
   } 
 
   public static function displayPlayerName($character) {
-    return '<span class="class-'.$character->class.'">'.utf8_decode($character->name).'</span>';
+    return '<span class="class-'.$character->class.'">'.$character->name.'</span>';
   }
   public static function getLocalMembers() {
-    $result = mysql_query("SELECT * FROM members");
+    $db = DB::instance();
+    $result = $db->query("SELECT * FROM members");
     $members = array();
-    while ($row = mysql_fetch_assoc($result)) {
+    while ($row = $db->row($result)) {
       $members[$row['id']] = urldecode($row['name']);
     }
     return $members;
@@ -161,12 +180,22 @@ public static function getItemNameById($id) {
   }
 
   public static function getBisStatus($playerId) {
+    $db = DB::instance();
     $query = "SELECT COUNT(*) as count FROM bis where player = ".$playerId;
-    $result = mysql_query($query);
-    while($row = mysql_fetch_assoc($result)) {
+    $result = $db->query($query);
+    while($row = $db->row($result)) {
       $return = $row['count'];
     }
     return (intval($return)/2)."/16";
+  }
+
+  public static function getDropType($type) {
+    switch($type) {
+      case 1:
+        return "Best in Slot";
+      default:
+        return "Other Loot";
+    }
   }
 
 

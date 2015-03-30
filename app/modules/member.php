@@ -5,12 +5,25 @@ class MemberConfiguration {
   public $name = "Member Configuration";
   public $icon = "fa fa-group";
   public $slots = array("Weapon 1", "Weapon 2", "Head", "Neck", "Shoulder", "Back", "Chest", "Wrist", "Hands", "Waist", "Legs", "Feet", "Ring 1", "Ring 2", "Trinket 1", "Trinket 2");
+  private $db = null;
 
   public function content() {
+    if(is_null($this->db)) {
+      $this->db = DB::instance();
+    }
     $guild = Armory::getMembers();
 
     if(isset($_POST['update'])) {
       $this->updateBisList();
+    }
+
+    if(is_null($guild)) {
+      // try again:
+      $guild = Armory::getMembers();
+      if(is_null($guild)) {
+        echo "Guild not found";
+      }
+      return;
     }
 
     if(!isset($_GET['entry'])) {
@@ -31,7 +44,7 @@ class MemberConfiguration {
     echo '</tr>';
     echo '</thead>';
     echo '<tbody>';
-    foreach($guild->members as $member) {
+    foreach($guild->members as $member) { 
       if($settings->ranks[$member->rank]['display'] != 1)
         continue;
 
@@ -89,14 +102,16 @@ class MemberConfiguration {
       $oneObtained = false;
       for($prio = 1; $prio <= 2; $prio++) {
         $query = "SELECT * FROM bis WHERE player = ".$_GET['entry']." AND slot = '".str_replace(" ", "-", $slot)."#".$prio."'";
-        $result = mysql_query($query);
+        $result = $this->db->query($query);
         $selected = null;
         $obtained = false;
-        if(mysql_num_rows($result) > 0) {
-          while($row = mysql_fetch_assoc($result)) {
+        if($this->db->count($result) > 0) {
+          while($row = $this->db->row($result)) {
             $selected = $row['item'];
-            if($row['obtained'] != 0) {
-              $obtained = $row['obtained'];
+            $obtained_query = "SELECT * FROM drops WHERE member = ".$_GET['entry']." AND item =".$selected;
+            $obtained_result = $this->db->query($obtained_query);
+            if($this->db->count($obtained_result) > 0) {
+              $obtained = true;
               if($prio == 1) {
                 $oneObtained = true;
               }
@@ -107,7 +122,11 @@ class MemberConfiguration {
           if($prio == 2 && $oneObtained) {
             echo '<td>-</td>';
           } else {
-            echo '<td>'.urldecode(Armory::formatItem(Armory::getItemNameById($selected), $selected)).'</td>';
+            $obtained_add = "";
+            if($locked && $obtained) {
+              $obtained_add = '<i class="left-space light fa fa-check"></i>';
+            }
+            echo '<td>'.urldecode(Armory::formatItem(Armory::getItemNameById($selected), $selected)).$obtained_add.'</td>';
           }
         } else {
           echo '<td>'.Armory::getItemSelection(str_replace(" ", "-", $slot)."#".$prio, $selected).'</td>';
@@ -130,15 +149,15 @@ class MemberConfiguration {
         $cur_slot = $slot."#".$prio;
         if(isset($_POST[$cur_slot])) {
           $query = "SELECT * FROM bis WHERE slot = '".$cur_slot."' AND player = ".$_GET['entry'];
-          $result = mysql_query($query);
-          if(mysql_num_rows($result) > 0) {
+          $result = $this->db->query($query);
+          if($this->db->count($result) > 0) {
             // update
             $query = "UPDATE bis SET item = ".$_POST[$cur_slot]." WHERE player = ".$_GET['entry']." AND slot ='".$cur_slot."'";
-            mysql_query($query) or die(mysql_error());
+            $this->db->query($query);
           } else {
             // insert
             if($_POST[$cur_slot] != 0) {
-              mysql_query("INSERT INTO bis (id, player, slot, item) VALUES (NULL, '".$_GET['entry']."', '".$cur_slot."', ".$_POST[$cur_slot].")");
+              $this->db->query("INSERT INTO bis (id, player, slot, item) VALUES (NULL, '".$_GET['entry']."', '".$cur_slot."', ".$_POST[$cur_slot].")");
             }
           }
         }

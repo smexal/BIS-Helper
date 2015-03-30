@@ -1,6 +1,7 @@
 <?php
 session_start();
-include("armory.php");
+include("classes/class.database.php");
+include("classes/class.armory.php");
 include("modules/history.php");
 include("modules/member.php");
 include("modules/items.php");
@@ -11,10 +12,8 @@ class App {
   private static $instance = null;
   private $modules = array();
   private $current_module = "finder";
-  public $database = false;
 
   public function start() {
-    $this->database();
 
     $this->modules['finder'] = new ItemFinder();
     $this->modules['history'] = new LootHistory();
@@ -106,18 +105,12 @@ class App {
 
   }
 
-  public function database() {
-    $this->database = mysql_connect(DB_SERVER, DB_USER, DB_PASSWORD);
-    mysql_select_db(DB_NAME, $this->database);
-  }
-
   public function shutdown() {
-    mysql_close($this->database);
+    // TODO: close database connection
   }
 
   public static function error($message="Undefined error") {
-    echo '<h1>Error</h1>';
-    echo '<p class="error">'.$message.'</p>';
+    echo '<div class="error"><i class="fa fa-exclamation-triangle"></i><p>'.$message.'</p></div>';
   }
 
   public static function instance() {

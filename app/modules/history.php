@@ -4,41 +4,28 @@ class LootHistory {
   public $id = 'history';
   public $name = 'Loot history';
   public $icon = 'fa fa-legal';
+  private $db = null;
 
   public function content() {
+    if(is_null($this->db))
+      $this->db = DB::instance();
+
     $app = App::instance();
 
-    $raids = mysql_query("SELECT DISTINCT obtained FROM bis order by obtained desc");
-    while($row = mysql_fetch_assoc($raids)) {
+    $raids = $this->db->query("SELECT DISTINCT DATE(date) as 'raid' FROM drops order by date desc");
+    while($row = $this->db->row($raids)) {
       echo '<div class="raid">';
-      if($row['obtained'] == 0)
-        continue;
-      $year = substr($row['obtained'], 0, 4);
-      $month = substr($row['obtained'], 4, 2);
-      $day = substr($row['obtained'], 6, 2);
-      echo '<h1>'.$year."/".$month."/".$day.'</h1>';
-      echo '<div class="half">';
-      echo '<h2>Best in Slot Items</h2>';
-      $items = mysql_query("SELECT * FROM bis WHERE obtained = ".$row['obtained']);
-      echo '<ul>';
-      while($item = mysql_fetch_assoc($items)) {
-        echo '<li>';
-        echo urldecode(Armory::formatItem(Armory::getItemNameById($item['item']), $item['item']));
-        echo ' <i class="fa fa-angle-double-right"></i> ';
-        echo Armory::getPlayerNameById($item['player']);
-        echo '</li>';
-      }
-      echo '</ul>';
-      echo '</div>';
-      echo '<div class="half">';
-
-      echo '<h2>Other Drops</h2>';
+      echo '<h1>'.$row['raid'].'</h1>';
+      echo '<div class="">';
       $drops = false;
-      $items = mysql_query("SELECT * FROM drops WHERE DATE(date) = '".$year."-".$month."-".$day."'");
+      $items = $this->db->query("SELECT * FROM drops WHERE DATE(date) = '".$row['raid']."' order by type desc");
       echo '<ul>';
-      while($item = mysql_fetch_assoc($items)) {
+      while($item = $this->db->row($items)) {
         $drops = true;
         echo '<li>';
+        echo '<span class="drop-type">';
+        echo Armory::getDropType($item['type']);
+        echo '</span>';
         echo urldecode(Armory::formatItem(Armory::getItemNameById($item['item']), $item['item']));
         echo ' <i class="fa fa-angle-double-right"></i> ';
         echo Armory::getPlayerNameById($item['member']);

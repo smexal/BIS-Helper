@@ -13,7 +13,7 @@ function item_save_prev() {
             var clicked = $(this);
             $.ajax({
                 method: "POST",
-                url: "/ajax.php",
+                url: "ajax.php",
                 data: { action: "addItemToPlayer", item: clicked.prev().attr('data-id'), player: clicked.prev().val() }
             }).done(function(data) {
               clicked.next().text(data);

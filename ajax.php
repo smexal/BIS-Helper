@@ -9,10 +9,11 @@ require_once("app/app.php");
 
 $app = App::instance();
 $app->start();
-
-if(isset($_POST['action'])) {
-    if($_POST['action'] == 'addItemToPlayer') {
-        echo AjaxMethods::addItemToPlayer($_POST['item'], $_POST['player']);
+if(Settings::loggedIn()) {
+    if(isset($_POST['action'])) {
+        if($_POST['action'] == 'addItemToPlayer') {
+            echo AjaxMethods::addItemToPlayer($_POST['item'], $_POST['player']);
+        }
     }
 }
 
