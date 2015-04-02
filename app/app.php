@@ -2,6 +2,7 @@
 session_start();
 include("classes/class.database.php");
 include("classes/class.armory.php");
+include("modules/dashboard.php");
 include("modules/history.php");
 include("modules/member.php");
 include("modules/items.php");
@@ -11,10 +12,11 @@ include("modules/settings.php");
 class App {
   private static $instance = null;
   private $modules = array();
-  private $current_module = "history";
+  private $current_module = "dashboard";
 
   public function start() {
 
+    $this->modules['dashboard'] = new Dashboard();
     $this->modules['history'] = new LootHistory();
     $this->modules['finder'] = new ItemFinder();
     $this->modules['member'] = new MemberConfiguration();
@@ -35,10 +37,16 @@ class App {
       "reset.css",
       "//fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic",
       "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css",
-      "main.css" 
+      "main.css" ,
+      "layout.css",
+      "table.css",
+      "form.css",
+      "wow.css",
+      "jelly.css"
     );
     $js_data = array(
       "//code.jquery.com/jquery-1.11.2.min.js",
+      "//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js",
       "externals/tablesort/jquery.tablesorter.min.js",
       "//static.wowhead.com/widgets/power.js",
       "main.js",
@@ -64,7 +72,8 @@ class App {
   }
 
   public function navigation_panel() {
-    $return = '<div class="navigation-panel">';
+    $return = '';
+    $return.= '<div class="navigation-panel">';
     $return.= '<div class="top">';
     $bottom_modules = array();
     foreach($this->modules as $module) {
@@ -97,12 +106,40 @@ class App {
   }
 
   public function content() {
+    $return = '';
     if(array_key_exists($this->current_module, $this->modules)) {
-      echo $this->modules[$this->current_module]->content();
+      $content = $this->modules[$this->current_module]->content();
+      $return = $this->top_panel();
+      $return.= $content;
     } else {
       $this->error("Module does not exist.");
     }
+    echo $return;
+  }
 
+  public function top_panel() {
+    $return = '';
+    $return.= '<div class="top-panel">';
+    $return.= '<div class="left">';
+    $return.= '<div class="breadcrump">';
+    if(! is_null($this->modules[$this->current_module]->path)) {
+      foreach($this->modules[$this->current_module]->path as $name => $url) {
+        $return.='<a href="'.$url.'">'.$name.'</a>&nbsp;»&nbsp;';
+      }
+    }
+    $return.= '</div>';
+    $return.= '<h1>'.$this->modules[$this->current_module]->name.'</h1>';
+    $return.= '</div>';
+    $return.= '<div class="right">';
+    if(! is_null($this->modules[$this->current_module]->actions)) {
+      foreach($this->modules[$this->current_module]->actions as $name => $url) {
+        $return.='<a class="btn" href="'.$url.'">'.$name.'</a>';
+      }
+    }
+    $return.= '</div>';
+    $return.= '</div>';
+
+    return $return;
   }
 
   public function shutdown() {

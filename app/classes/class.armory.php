@@ -97,7 +97,7 @@ class Armory {
   }
 
   public static function displayPlayerThumbnail($member) {
-    echo '<img src="'.self::$thumbnail_www.$member->character->thumbnail.'" class="character-thumbnail" />';
+    return '<img src="'.self::$thumbnail_www.$member->character->thumbnail.'" class="character-thumbnail" />';
   }
 
   public static function addMemberToDatabase($member) {
@@ -110,7 +110,7 @@ class Armory {
       }
     }
     if(!$found) {
-      $query = "INSERT INTO members (id, name, realm) VALUES (NULL, '".utf8_decode($member->character->name)."', '".mysql_real_escape_string(utf8_decode($member->character->realm))."')";
+      $query = "INSERT INTO members (id, name, realm) VALUES (NULL, '".utf8_decode($member->character->name)."', '".DB::escape($member->character->realm)."')";
       $db->query($query);
     }
   }
@@ -128,11 +128,14 @@ class Armory {
     $db->query("INSERT INTO drops (member, item) VALUES ($player, $item)");
   }
 
-  public static function getPlayerNameById($id) {
+  public static function getPlayerNameById($id, $type="default") {
     $db = DB::instance();
     $result = $db->query("SELECT name, realm FROM members where id=".$id);
     while($row = $db->row($result)) {
-      return '<a href="'.self::$base_www.'character/'.strtolower($row['realm']).'/'.$row['name'].'/simple" target="_blank">'.utf8_encode($row['name']).' <i class="fa fa-external-link"></i></a>';
+      if($type=="raw") {
+        return utf8_encode($row['name']);
+      }
+      return '<a href="'.self::$base_www.'character/'.strtolower($row['realm']).'/'.utf8_encode($row['name']).'/simple" target="_blank">'.utf8_encode($row['name']).' <i class="fa fa-external-link small descent"></i></a>';
     }
   }
 

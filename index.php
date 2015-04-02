@@ -13,6 +13,10 @@ $app->start();
 
 <html>
 <head>
+<!-- favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<!-- favicon end -->
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -29,6 +33,7 @@ $app->start();
 
 </head>
 <body>
+<div class="page-loading"><img src="images/loading.gif"></div>
 <?php
 echo $app->navigation_panel();
 

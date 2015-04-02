@@ -22,6 +22,10 @@ class DB {
         return mysqli_num_rows($result);
     }
 
+    public static function escape($string) {
+        return mysqli_real_escape_string(utf8_decode($string));
+    }
+
     private function __construct(){
         if(is_null($this->database)) {
             $this->database = mysqli_connect(DB_SERVER, DB_USER, DB_PASSWORD, DB_NAME);

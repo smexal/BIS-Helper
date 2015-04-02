@@ -5,27 +5,29 @@ class ItemConfiguration {
   public $name = "Item Configuration";
   public $icon = "fa fa-gear";
   public $position = "bottom";
+  public $path = array("Items" => "?module=items");
+  public $actions = array();
   private $app = null;
 
   public function content() {
+    $content = '';
     $this->app = App::instance();
-
-    echo '<h1>Item Configuration</h1>';
 
     if(Settings::loggedIn()) {
       if(!isset($_POST['search']) || !is_numeric($_POST['from'])) {
-        echo '<p>Search for items. Enter the item ID to fill the local database with item names.</p>';
-        echo '<form method="post">';
-        echo '<label><span>From: </span><input id="from" name="from"></label>';
-        echo '<label><span>To: </span><input id="to" name="to"></label>';
-        echo '<label><span>&nbsp;</span><input type="submit" name="search"></label>';
-        echo '</form>';
+        $content.= '<p>Search for items. Enter the item ID to fill the local database with item names.</p>';
+        $content.= '<form method="post">';
+        $content.= '<label><span>From: </span><input id="from" name="from"></label>';
+        $content.= '<label><span>To: </span><input id="to" name="to"></label>';
+        $content.= '<label><span>&nbsp;</span><input type="submit" name="search"></label>';
+        $content.= '</form>';
       } else {
         $this->search();
       }
     } else {
-      echo Settings::loginForm($this->id);
+      $content.= Settings::loginForm($this->id);
     }
+    return $content;
   }
 
   public function search() {

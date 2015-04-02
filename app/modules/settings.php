@@ -2,9 +2,11 @@
 
 class Settings {
   public $id = "settings";
-  public $name = "Configuratin & Settings";
+  public $name = "Configuration & Settings";
   public $icon = "fa fa-lock";
   public $position = "bottom";
+  public $path = array("Settings" => "?module=settings");
+  public $actions = array();
   private $versions = array(
     "v0.9.1" => "history as first tab, fixed utf8 problem.",
     "v0.9.0" => "all drops in general droplist, added some improvements to the database structure, switch to 'mysqli'.",
@@ -38,11 +40,11 @@ class Settings {
   }
 
   public function content() {
-    echo '<h1>Preferences & Configuration</h1>';    
+    $content = '';
   	if(isset($_POST['Login'])) {
         if($_POST['password'] == $this->password) {
             if(isset($_POST['camefrom'])) {
-              echo '<meta http-equiv="refresh" content="0; url=?module='.$_POST['camefrom'].'">';
+              $content.= '<meta http-equiv="refresh" content="0; url=?module='.$_POST['camefrom'].'">';
             }
             $_SESSION['auth'] = true;
   		}
@@ -60,34 +62,41 @@ class Settings {
 
 
       if(!isset($_GET['configure'])) {
-        echo '<div class="half">';
-          echo '<ul>';
-          echo '<li><a href="?module='.$this->id.'&configure=general">General Settings</a></li>';
-          echo '<li><a href="?module='.$this->id.'&configure=member">Member Level Configuration</li>';
-          echo '<li><a href="?module='.$this->id.'&logout">Logout</a></li>';
-          echo '</ul>';
-        echo '</div>';
-        echo '<div class="half">';
-        echo '<h3>Quick Tools</h3>';
-        $this->unlockLockAllPlayersView();
-        echo '</div>';
+        $content.= '<div class="half">';
+          $content.= '<ul>';
+          $content.= '<li><a href="?module='.$this->id.'&configure=general">General Settings</a></li>';
+          $content.= '<li><a href="?module='.$this->id.'&configure=member">Member Level Configuration</li>';
+          $content.= '<li><a href="?module='.$this->id.'&configure=content">Current Content Configuration</li>';
+          $content.= '<li><a href="?module='.$this->id.'&logout">Logout</a></li>';
+          $content.= '</ul>';
+        $content.= '</div>';
+        $content.= '<div class="half">';
+        $content.= '<h3>Quick Tools</h3>';
+        $content.= $this->unlockLockAllPlayersView();
+        $content.= '</div>';
       } else {
           switch ($_GET['configure']) {
               case 'general':
-                  $this->configureGeneral();
-                  break;
+                $content.= $this->configureGeneral();
+                break;
               case 'member':
-                  $this->configureMember();
+                $content.= $this->configureMember();
+                break;
+              case 'content':
+                $content.= $this->configureContent();
+                break;
               default:
                   break;
           }
       }
   	} else {
-        echo self::loginForm();
+        $content.= self::loginForm();
   	}
+    return $content;
   }
 
   public function configureMember() {
+    $content = '';
     if(isset($_POST['update'])) {
       foreach($_POST as $key => $value) {
         if($key == 'update')
@@ -121,8 +130,8 @@ class Settings {
         }
       }
     }
-    echo '<form method="post">';
-    echo '<label><span>&nbsp;</span><input type="submit" name="update" value="Save changes" /></label>';
+    $content.= '<form method="post">';
+    $content.= '<label><span>&nbsp;</span><input type="submit" name="update" value="Save changes" /></label>';
     $guild = Armory::getMembers();
     $ranks = array();
     foreach($guild->members as $member) {
@@ -132,20 +141,25 @@ class Settings {
     }
     asort($ranks);
     foreach ($ranks as $rank) {
-      echo '<label><span>Rank '.$rank.'</span><input type="text" value="'.$this->ranks[$rank]['name'].'" name="rank-'.$rank.'" /></label>';
+      $content.= '<label><span>Rank '.$rank.'</span><input type="text" value="'.$this->ranks[$rank]['name'].'" name="rank-'.$rank.'" /></label>';
       $checked = '';
       if($this->ranks[$rank]['display'] == 1) {
         $checked = "checked='checked'";
       }
-      echo '<label><span>Display:</span><input type="checkbox" '.$checked.' name="display-'.$rank.'" /></label>';
-      echo '<hr />';
+      $content.= '<label><span>Display:</span><input type="checkbox" '.$checked.' name="display-'.$rank.'" /></label>';
+      $content.= '<hr />';
     }
 
 
-    echo '</form>';
+    $content.= '</form>';
+    return $content;
   }
 
   public function configureGeneral() {
+    $this->name = "General Settings";
+    $this->path["General"] = "?module=settings&configure=general";
+
+    $content = "";
     if(isset($_POST['save'])) {
       foreach($_POST as $key => $value) {
         if($key != "save") {
@@ -164,28 +178,55 @@ class Settings {
         }
       }
     }
-    echo '<h2>Password Change</h2>';
-    echo '<form method="post">';
-    echo '<label><span>&nbsp;</span><input type="submit" name="save" value="Save changes" /></label>';
-    echo '<label><span>Admin Password</span><input type="text" value="'.$this->password.'" name="password" />';
-    echo '</form>';
+    $content.='<h2>Password Change</h2>';
+    $content.='<form method="post">';
+    $content.='<label><span>&nbsp;</span><input type="submit" name="save" value="Save changes" /></label>';
+    $content.='<label><span>Admin Password</span><input type="text" value="'.$this->password.'" name="password" />';
+    $content.='</form>';
 
-    echo '<a class="back-link" href="?module='.$this->id.'">back</a>';
-    echo '<hr style="margin-top: 80px" />';
-    echo '<h2>Version Overview</h2>';
-    echo '<table class="finder">';
+    $content.='<a class="back-link" href="?module='.$this->id.'">back</a>';
+    $content.='<hr style="margin-top: 80px" />';
+    $content.='<h2>Version Overview</h2>';
+    $content.='<table class="finder">';
     foreach($this->versions as $version => $changes) {
-      echo '<tr>';
-      echo '<th>'.$version.'</th>';
-      echo '<td>'.$changes.'</td>';
-      echo '</tr>';
+      $content.='<tr>';
+      $content.='<th>'.$version.'</th>';
+      $content.='<td>'.$changes.'</td>';
+      $content.='</tr>';
     }
-    echo '</table>';
+    $content.='</table>';
+    return $content;
+  }
+
+  public function configureContent() {
+    $content = '';
+    $content.= '<h2>Content Configuration</h2>';
+    $content.= '<hr />';
+    $content.= '<p>Configure the currently playing content. The defined values will be available for setting up a specific best in slot list.</p>';
+    $content.= '<h3 style="margin-top:30px">Configured Content</h3>';
+    App::error('no content, so no decision is available.');
+    // actions
+    $content.= '<hr />';
+    $content.= '<form method="post">';
+    $content.= '<h3>Add new Content</h3>';
+    $content.= '<label><span>Name the content <small>(e.g. BRF)</small></span><input type="text" name="contentname"></label>';
+    $content.= '<label><span>Difficulty</span>
+      <select>
+        <option value="normal">normal</option>
+        <option value="raid-heroic">heroic</option>
+        <option value="raid-mythic">mythic</option>
+    </select></label>';
+    $content.= '<label><span>&nbsp;</span><input type="submit" name="newcontent" value="Add new"></label>';
+    $content.= '</form>';
+    $content.= '<a class="back-link" href="?module='.$this->id.'">back</a>';
+    return $content;
   }
 
   public function unlockLockAllPlayersView() {
-    echo '<a class="btn half quicktool" href="?module='.$this->id.'&lock"><i class="fa fa-lock"></i> Lock all Players</a>';
-    echo '<a class="btn half quicktool" href="?module='.$this->id.'&unlock"><i class="fa fa-unlock"></i> Unlock all Players</a>';
+    $content = '';
+    $content.= '<a class="btn half quicktool" href="?module='.$this->id.'&lock"><i class="fa fa-lock"></i> Lock all Players</a>';
+    $content.= '<a class="btn half quicktool" href="?module='.$this->id.'&unlock"><i class="fa fa-unlock"></i> Unlock all Players</a>';
+    return $content;
   }
 
   public static function isLocked($playerID) {

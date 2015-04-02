@@ -1,0 +1,105 @@
+.content table {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+.content table tr th, table tr td {
+  border-bottom: 1px solid #2e616b;
+  padding: 10px 20px;
+}
+.content table tr th:first-child, .content table tr td:first-child,
+.content table tr th:last-child, .content table tr td:last-child {
+  padding: 10px 0;
+}
+.content table tr:last-child td, table tr:last-child th {
+  border-bottom: none;
+}
+.content table tr th {
+  font-size: 12px;
+  font-weight: normal;
+  color: #ff4e50;
+  text-transform: uppercase;
+  text-align: left;
+  line-height: 30px;
+}
+.content table tr th.slot {
+  min-width: 100px;
+}
+.content table tr td {
+  line-height: 30px;
+}
+.content table.members {
+  width: 100%;
+}
+.content table td.member-image {
+  width: 30px;
+}
+.content table td.member-image img {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;  
+  position: relative;
+  top: 6px;
+  border: 1px solid #121a1c;
+}
+
+/*table.members, table.bis, table.finder {
+  margin-top: 20px;
+  width: 60%;
+}
+table.finder {
+  width: 100%;
+}
+
+table td.member-image {
+  width: 32px;
+  padding: 0 !important;
+  position: relative;
+  top:8px;
+}
+table td.member-image img {
+  border: 1px solid #333;
+}
+
+table.members tr, table.bis tr, table.finder tr {
+  border-bottom: 1px solid #333;
+}
+table tr:last-child {
+  border-bottom: none;
+}
+table.members td,
+table.members th,
+table.finder td {
+  height: 20px;
+  padding: 10px 5px;
+}
+
+table tr.obtained td,
+table tr.obtained td i {
+  color: #444;
+}
+*/
+
+table.members thead tr th.header:first-child {
+  background-image:none;
+  padding-left: 0;
+}
+
+table thead th.header {
+  background-image:url("../images/sort-inactive.png");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  padding-left: 30px;
+}
+
+table thead th.header.headerSortUp {
+  background-image:url("../images/sort-up.png");
+}
+table thead th.header.headerSortDown {
+  background-image:url("../images/sort-down.png");
+}
+
+td.right,
+th.right {
+  text-align: right !important;
+}

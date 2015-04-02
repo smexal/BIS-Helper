@@ -1,0 +1,126 @@
+.navigation-panel {
+  width: 60px;
+  background-color: #16272b;
+  -webkit-box-shadow: 2px 0px 10px 0px rgba(18, 26, 28, 1);
+  -moz-box-shadow:    2px 0px 10px 0px rgba(18, 26, 28, 1);
+  box-shadow:         2px 0px 10px 0px rgba(18, 26, 28, 1);
+  height: 100%;
+  top: 0;
+  position: fixed;
+  float: left;
+}
+.navigation-panel .top {
+  margin-top: 60px;
+}
+.navigation-panel a {
+  display: block;
+  width: 100%;
+  color: #ff4e50;
+  position: relative;
+  text-align: center;
+  padding: 20px 0;
+  transition: 200ms;
+}
+.navigation-panel a:hover {
+  color: #ff8182;
+}
+.navigation-panel a.active {
+  background-color: #ff4e50;
+  color: #16272b;
+}
+.navigation-panel a.active:after {
+  display:block;
+  position: absolute;
+  content: "";
+
+  right: -6px;
+  width: 0; 
+  height: 0; 
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid #ff4e50;
+  top: 24px;
+}
+.navigation-panel a i {
+  font-size: 20px;
+}
+
+.bottom {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+.content {
+  float: left;
+  width: 80%;
+  margin-left: 60px;
+  padding-left: 60px;
+  padding-top: 60px;
+}
+
+.top-panel {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ff4e50;
+}
+.top-panel:before, .top-panel:after {
+  display:block;
+  content:"";
+  clear:both;
+}
+.top-panel .left {
+  float: left;
+  width: 40%;
+}
+.top-panel .right {
+  float: right;
+  width: 40%;
+  text-align: right;
+}
+
+.breadcrump {
+  line-height: 30px;
+  color: #678187;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+}
+.breadcrump a {
+  color: #678187;
+  transition: 200ms;
+}
+.breadcrump a:hover {
+  color: #81a1a9;
+}
+
+.sub-menu a {
+  color: #678187;
+  font-size: 24px;
+}
+.sub-menu a.active {
+  color: #FFF;
+}
+.sub-menu a > i {
+  margin-left: 10px;
+  transition: 200ms;
+  opacity: .5;
+}
+.sub-menu a > i:hover {
+  opacity: 1;
+}
+
+.flyout {
+  border-radius: 2px;
+  position: absolute;
+  left: 50%;
+  margin-left: -100px;
+  top: 300px;
+  min-width: 200px;
+  min-height: 200px;
+  background-color: #16272b;
+  -webkit-box-shadow: 2px 0px 10px 0px rgba(18, 26, 28, 1);
+  -moz-box-shadow:    2px 0px 10px 0px rgba(18, 26, 28, 1);
+  box-shadow:         2px 0px 10px 0px rgba(18, 26, 28, 1);
+
+  display: none;
+}

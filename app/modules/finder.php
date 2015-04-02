@@ -4,12 +4,14 @@ class ItemFinder {
   public $id = "finder";
   public $name = "Item Finder";
   public $icon = "fa fa-search";
+  public $path = Array("Finder" => "?module=finder");
+  public $actions = array();
 
   public function content() {
-    echo '<h1>Item Finder</h1>';
-    echo '<p>Type the name, of the item you want to assign<br /> to a person.</p>';
+    $content = '';
+    $content.= '<p>Type the name, of the item you want to assign to a person.</p>';
 
-    echo '<form method="post">';
+    $content.= '<form method="post">';
     if(isset($_POST['term'])) {
       $term = $_POST['term'];
     } else {
@@ -19,9 +21,9 @@ class ItemFinder {
         $term = '';
       }
     }
-    echo '<input type="text" name="term" value="'.$term.'" />';
-    echo '<input type="submit" name="go" value="Search" />';
-    echo '</form>';
+    $content.= '<input type="text" name="term" value="'.$term.'" />';
+    $content.= '<input type="submit" name="go" value="Search" />';
+    $content.= '</form>';
     if(Settings::loggedIn()) {
        $db = DB::instance();
       if(isset($_GET['obtained'])) {
@@ -43,24 +45,33 @@ class ItemFinder {
     }
 
     if(isset($_POST['go']) || isset($_GET['term'])) {
-      $this->displayResults($term);
+      $content.= $this->displayResults($term);
     }
+    return $content;
   }
 
   public function displayResults($term) {
+    $content = '';
     $db = DB::instance();
     $query = "SELECT * FROM items WHERE name LIKE '%".urlencode($term)."%'";
     $result = $db->query($query);
 
     if($db->count($result) > 0) {
+      $count = 0;
       while($row = $db->row($result)) {
+        if($count % 3 == 0 && $count > 0) {
+          $last = " last";
+        } else {
+          $last = "";
+        }
+        $count++;
         $found = false;
-        echo '<div class="bis-block">';
-        echo '<h2>'.Armory::formatItem(urldecode($row['name']), $row['id']).'</h2>';
+        $content.= '<div class="bis-block '.$last.'">';
+        $content.= '<h2>'.Armory::formatItem(urldecode($row['name']), $row['id']).'</h2>';
         $query = "SELECT *, SUBSTRING_INDEX(SUBSTRING_INDEX(slot,'#', 2), '#',-1) as priority FROM bis WHERE item = ".$row['id']." order by priority asc";
         $bis_items = $db->query($query);
 
-        echo '<table class="finder">';
+        $content.= '<table class="finder">';
         while($item = $db->row($bis_items)) {
           $found = true;
           if(Armory::itemReceived($item['player'], $item['item'])) {
@@ -68,38 +79,47 @@ class ItemFinder {
           } else {
             $class="";
           }
-          echo '<tr '.$class.'>';
-          echo '<td width="20">';
+          $content.= '<tr '.$class.'>';
+          $content.= '<td width="20">';
           if(! Armory::itemReceived($item['player'], $item['item'])) {
-            echo '<a href="?module='.$this->id.'&term='.$term.'&obtained='.$row['id'].'&player='.$item['player'].'">';
-            echo '<i class="fa fa-check"></i>';
-            echo '</a>';
+            if(Settings::loggedIn()) {
+              $content.= '<a href="?module='.$this->id.'&term='.$term.'&obtained='.$row['id'].'&player='.$item['player'].'">';
+            }
+            $content.= '<i class="fa fa-close"></i>';
+            if(Settings::loggedIn()) {
+              $content.= '</a>';
+            }
           } else {
-            echo '<a href="?module='.$this->id.'&term='.$term.'&obtained='.$row['id'].'&player='.$item['player'].'&reset=true">';
-            echo '<i class="fa fa-close"></i>';
-            echo '</a>';
+            if(Settings::loggedIn()) {
+              $content.= '<a href="?module='.$this->id.'&term='.$term.'&obtained='.$row['id'].'&player='.$item['player'].'&reset=true">';
+            }
+            $content.= '<i class="fa fa-check"></i>';
+            if(Settings::loggedIn()) {
+              $content.= '</a>';
+            }
           }
-          echo '</td>';
-          echo '<td>';
-          echo Armory::getPlayerNameById($item['player']);
-          echo '</td><td class="right">';
-          echo '#'.$item['priority'];
-          echo '</td>';
-          echo '</tr>';
+          $content.= '</td>';
+          $content.= '<td>';
+          $content.= Armory::getPlayerNameById($item['player']);
+          $content.= '</td><td class="right">';
+          $content.= '#'.$item['priority'];
+          $content.= '</td>';
+          $content.= '</tr>';
         }
-        echo '</table>';
+        $content.= '</table>';
         if(!$found) {
-          echo '<p>No one wants this item!</p>';
+          $content.= '<p>No one wants this item!</p>';
         }
-        echo Armory::assignItemToPlayerView($row['id']);
-
-        echo '</div>';
+        if(Settings::loggedIn()) {
+          $content.= Armory::assignItemToPlayerView($row['id']);
+        }
+        $content.= '</div>';
       }
 
     } else {
-      echo '<h2>No items found for "<i>'.$term.'</i>".</h2>';
+      $content.= '<h2>No items found for "<i>'.$term.'</i>".</h2>';
     }
-
+    return $content;
   }
 }
 
