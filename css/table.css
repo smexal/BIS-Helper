@@ -43,6 +43,10 @@
   border: 1px solid #121a1c;
 }
 
+.bis-block .finder {
+  width: 100%;
+}
+
 /*table.members, table.bis, table.finder {
   margin-top: 20px;
   width: 60%;

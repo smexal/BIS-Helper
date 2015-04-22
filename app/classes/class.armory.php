@@ -201,6 +201,24 @@ class Armory {
     }
   }
 
+  public static function bisListTitleForm($settings) {
+    $return = '';
+    $return.= '<h3>Change List Name</h3>';
+    $return.= '<form method="post">';
+    if($settings['id'] == 0) {
+      $name = "Untitled Spec";
+    } else {
+      $name = $settings['oldname'];
+    }
+    foreach($settings as $setting => $value) {
+      $return.= '<input type="hidden" name="'.$setting.'" value="'.$value.'" />';
+    }
+    $return.= '<input type="text" name="name" value="'.$name.'"><br />';
+    $return.= '<input type="submit" name="newName" value="Save">';
+    $return.= '</form>';
+    return $return;
+  }
+
 
   private static function getUrlContent($url){
     $ch = curl_init();

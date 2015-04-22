@@ -32,6 +32,12 @@ class MemberConfiguration {
     if(!isset($_GET['entry'])) {
       $content.= $this->memberList($guild);
     } else {
+      // update specname
+      if(isset($_POST['newName'])) {
+        Helper::updateSpecName($_POST['id'], $_POST['name'], $_POST['player']);
+      }
+
+
       $content.= $this->memberDetail($_GET['entry']);
     }
     return $content;
@@ -97,34 +103,7 @@ class MemberConfiguration {
     }
 
     // get all specs for this player
-    $specs = $this->db->query("SELECT DISTINCT spec FROM bis WHERE player=".$_GET['entry']);
-    if(!isset($_GET['spec'])) {
-      $active_spec = "first";
-    }
-    $content.='<div class="sub-menu">';
-    $count = 0;
-    while($spec = $this->db->row($specs)) {
-      if($active_spec == "first" && $count == 0) {
-        $active = "active";
-      } else {
-        $active = "";
-      }
-      $spec_name = $this->db->query("SELECT name FROM specs WHERE player=".$_GET['entry']." AND no=".$spec['spec']);
-      if($this->db->count($spec_name) === 0) {
-        $content.='<a href="#" class="'.$active.'">Untitled Spec</a>';
-      } else {
-        while($name = $this->db->row($spec_name)) {
-          $content.'<a href="#" class="'.$active.'">'.$spec_name.'</a>';
-        }
-      }
-      // edit link
-      $content.='<a href="javascript://" class="show-flyout" data-target="editSpec"><i class="fa fa-pencil-square"></i></a>';
-      $content.='<div class="flyout editSpec">';
-      $content.='</div>';
-      // edit link end
-      $count++;
-    }
-    $content.="</div>";
+    $content.= $this->getPlayerSpecs();
     // end spec changes
 
     $content.= '<form method="post" id="bislist">';
@@ -176,6 +155,43 @@ class MemberConfiguration {
     }
     $content.= '</table>';
     $content.= '</form>';
+    return $content;
+  }
+
+  private function getPlayerSpecs() {
+    $content = '';
+    $specs = $this->db->query("SELECT DISTINCT spec FROM bis WHERE player=".$_GET['entry']);
+    if(!isset($_GET['spec'])) {
+      $active_spec = "first";
+    }
+    $content.='<div class="sub-menu">';
+    $count = 0;
+    while($spec = $this->db->row($specs)) {
+      if($active_spec == "first" && $count == 0) {
+        $active = "active";
+      } else {
+        $active = "";
+      }
+      $id = 0;
+      $real_name = "Untitled Spec";
+      $thequery = "SELECT id, name FROM specs WHERE player=".$_GET['entry']." AND id=".$spec['spec'];
+      $spec_name = $this->db->query($thequery);
+      if($this->db->count($spec_name) === 0) {
+        $content.='<a href="#" class="'.$active.'">'.$real_name.'</a>';
+      } else {
+        while($name = $this->db->row($spec_name)) {
+          $id = $name['id'];
+          $real_name = $name['name'];
+          $content.='<a href="#" class="'.$active.'">'.$name['name'].'</a>';
+        }
+      }
+      // edit link
+      $content.='<a href="javascript://" class="show-flyout" data-target="editSpec"><i class="fa fa-pencil-square"></i></a>';
+      $content.= Helper::flyout("editSpec", "editSpec", array("id" => $id, "player" => $_GET['entry'], "oldname" => $real_name));
+      // edit link end
+      $count++;
+    }
+    $content.="</div>";
     return $content;
   }
 

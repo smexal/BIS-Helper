@@ -30,6 +30,15 @@ function item_save_prev() {
 }
 
 function flyout() {
+    $(".flyout > .close").each(function() {
+        $(this).on("click", function() {
+            var target = $(this).parent();
+            target.fadeOut(400);
+            setTimeout(function() {
+                target.removeClass("jelly");
+            }, 400);
+        });
+    });
     $(".show-flyout").each(function() {
         $(this).on("click", function() {
             if($("." + $(this).attr('data-target')).hasClass("jelly")) {
@@ -41,7 +50,21 @@ function flyout() {
                 }, 400);
             } else {
                 // jelly in
-                $("." + $(this).attr('data-target')).addClass("jelly");
+                var target = $("." + $(this).attr('data-target'));
+                target.addClass("jelly");
+                console.log(target.data("settings"));
+
+                $.ajax({
+                    method: "POST",
+                    url: "ajax.php",
+                    data: { 
+                        action: target.data("content"),
+                        settings: target.data("settings")
+                    }
+                }).done(function(data) {
+                    target.find("> .content").html(data);
+                });
+                // load the wanted data for the flyout
             }
             
         });

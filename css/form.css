@@ -21,7 +21,6 @@ input[type="text"] {
 input[type="submit"] {
   background-color: #ff4e50;
   border: 1px solid #ff4e50;
-  margin: 0 10px;
   min-width: 100px;
   text-transform: uppercase;
   font-weight: bold;

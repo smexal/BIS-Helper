@@ -1,5 +1,6 @@
 <?php
 session_start();
+include("classes/class.helper.php");
 include("classes/class.database.php");
 include("classes/class.armory.php");
 include("modules/dashboard.php");

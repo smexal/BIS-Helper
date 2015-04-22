@@ -22,9 +22,14 @@ class DB {
         return mysqli_num_rows($result);
     }
 
+    public function lastId() {
+        return mysqli_insert_id($this->database);
+    }
+
     public static function escape($string) {
         return mysqli_real_escape_string(utf8_decode($string));
     }
+
 
     private function __construct(){
         if(is_null($this->database)) {

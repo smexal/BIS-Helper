@@ -17,6 +17,12 @@ if(Settings::loggedIn()) {
     }
 }
 
+if(isset($_POST['action'])) {
+    if($_POST['action'] == "editSpec") {
+        echo Armory::bisListTitleForm($_POST['settings']);
+    }
+}
+
 class AjaxMethods {
 
     public static function addItemToPlayer($item, $player) {

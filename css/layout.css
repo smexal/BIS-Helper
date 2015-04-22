@@ -118,9 +118,33 @@
   min-width: 200px;
   min-height: 200px;
   background-color: #16272b;
-  -webkit-box-shadow: 2px 0px 10px 0px rgba(18, 26, 28, 1);
-  -moz-box-shadow:    2px 0px 10px 0px rgba(18, 26, 28, 1);
-  box-shadow:         2px 0px 10px 0px rgba(18, 26, 28, 1);
-
+  -webkit-box-shadow: 2px 0px 10px 0px rgba(20, 20, 20, 1);
+  -moz-box-shadow:    2px 0px 10px 0px rgba(20, 20, 20, 1);
+  box-shadow:         2px 0px 10px 0px rgba(20, 20, 20, 1);
   display: none;
+  padding: 20px;
+}
+
+.flyout .close {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+.flyout .close i {
+  color: #FFF;
+  font-size: 12px;
+}
+.flyout .content {
+  width: 100%;
+  margin: 0;
+  margin-top: 20px;
+  padding: 0;
+  position: relative;
+}
+.flyout .content img {
+  position: absolute;
+  margin-top: 50px;
+  left: 50%;
+  margin-left: -12px;
 }
